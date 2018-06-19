@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+</head>
+<body>
+  <section id="wrapper">
+    <div id="todos">
+
+      <header>
+        <input class="toggle-select-all" type="checkbox">
+        <input type="text" id="input-todo" v-on:keyup.enter="addTodo">
+      </header>
+
+      <ul>
+        
+        <li v-if="shouldShow(todo)" class="todo active" v-for="(todo, index) in todos">
+          <input type="checkbox" v-bind:checked="todo.completed">
+          <span class="content">{{todo.content}}</span>
+          <span class="delete" v-on:click="remove(index)">X</span>
+        </li>
+            
+      </ul>
+      <footer>
+        <span>
+          1 item(s) left
+        </span>
+        <div>
+          <input type="radio" v-on:click="showingCategory = 'all'" v-bind:checked="showingCategory === 'all'" name="status" value="all"> All
+          <input type="radio" v-on:click="showingCategory = 'active'" v-bind:checked="showingCategory === 'active'" name="status" value="active"> Active
+          <input type="radio" v-on:click="showingCategory = 'completed'" v-bind:checked="showingCategory === 'completed'" name="status" value="completed"> Completed
+        </div>
+
+      </footer>
+    </div>
+  </section>
+</body>
+<script src="https://unpkg.com/vue"></script>
+<script>
+  new Vue({
+    el: '#wrapper',
+    data: {
+      editingIndex: -1,
+      showingCategory: 'all',
+      todos: [{
+        content: 'eat',
+        completed: false,
+      },{
+        content: 'sleep',
+        completed: true,
+      }]
+    },
+    methods: {
+      addTodo(event) {
+        this.todos.push({
+          content: event.target.value,
+          completed: false,
+        })
+        event.target.value = ''
+      },
+      remove(index) {
+        this.todos.splice(index, 1)
+      },
+      shouldShow(todo) {
+        if (this.showingCategory === 'all') {
+          return true
+        } else if (this.showingCategory === 'active') {
+          return !todo.completed
+        } else if (this.showingCategory === 'completed') {
+          return todo.completed
+        }
+      }
+    }
+  })
+</script>
+</html>

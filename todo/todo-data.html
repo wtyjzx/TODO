@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>TODO</title>
+  <style>
+    li.completed {
+      text-decoration: line-through;
+    }
+  </style>
+</head>
+<body>
+  <section id="wrapper"></section>
+</body>
+<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+<script>
+  jQuery(function($) {
+    var todos = [{
+      content: 'eat',
+      completed: false,
+    }, {
+      content: 'sleep',
+      completed: true,
+    }]
+
+    var editingIndex = -1
+    var showingCategory = 'all'
+
+    function renderToHTML() {
+      return `
+        <div id="todos">
+          <header>
+            <input class="toggle-select-all" type="checkbox" ${todos.every(it => it.completed) ? 'checked' : ''} />
+            <input type="text" id="input-todo" />
+          </header>
+          <ul>
+            ${
+              todos.filter(todo => {
+                if (showingCategory === 'all') {
+                  return true
+                } else if (showingCategory === 'active') {
+                  return !todo.completed
+                } else if (showingCategory === 'completed') {
+                  return todo.completed
+                }
+              }).map((todo,i) => {
+                return `
+                  <li data-todo-index="${i}" class="todo ${todo.completed ? 'completed':'active'}">
+                    <input type="checkbox" ${todo.completed ? 'checked' : ''} />
+                    ${
+                      editingIndex == i ? 
+                      `<input type="text" class="editing" value="${todo.content}" />`
+                      :
+                      `<span class="content">${todo.content}</span>`
+                    }
+                    <span class="delete">X</span>
+                  </li>
+                `
+              }).join('')
+            }
+          </ul>
+          <footer>
+            <span>
+              ${todos.filter(it => !it.completed).length} item(s) left
+            </span>
+            <div>
+              <input type="radio" ${showingCategory === 'all' ? 'checked':''} name="status" value="all" /> All
+              <input type="radio" ${showingCategory === 'active' ? 'checked':''} name="status" value="active" /> Active
+              <input type="radio" ${showingCategory === 'completed' ? 'checked':''} name="status" value="completed" /> Completed
+            </div>
+
+            ${todos.some(it => it.completed) ? `<button class="clear-completed">Clear Completed</button>` : ''}
+          </footer>
+        </div>
+      `
+    }
+
+    function render() {
+      $('#wrapper').html(renderToHTML())
+    }
+
+    render()
+
+    $('#wrapper')
+      .on('click', 'li.todo input[type="checkbox"]', function() {
+        var index = $(this).closest('li.todo')[0].dataset.todoIndex
+        todos[index].completed = this.checked
+        render()
+      })
+      .on('click', 'li.todo span.delete', function(){
+        var index = $(this).parent().data('todoIndex')
+        todos.splice(index, 1)
+        render()
+      })
+      .on('keyup', '#input-todo', function(e){
+        if (e.keyCode === 13 && this.value) {
+          todos.push({
+            content: this.value,
+            completed: false
+          })
+          render()
+          $('#input-todo').focus()
+        }
+      })
+      .on('click', '.toggle-select-all', function() {
+        if (todos.every(it => it.completed)) {
+          todos.forEach(it => it.completed = false)
+        } else {
+          todos.forEach(it => it.completed = true)
+        }
+        render()
+      })
+      .on('click', '.clear-completed', function(){
+        todos = todos.filter(it => !it.completed)
+        render()
+      })
+      .on('dblclick', 'span.content', function(){
+        editingIndex = $(this).parent()[0].dataset.todoIndex
+        console.log(editingIndex, renderToHTML())
+        render()
+        $('input.editing').focus().prop('selectionStart', 9999)
+      })
+      .on('keyup focusout', 'input.editing', function(e){
+        if (e.keyCode === 13 || e.type === 'focusout') {
+          var index = $(this).parent()[0].dataset.todoIndex
+          todos[index].content = this.value
+          editingIndex = -1
+          render()
+        }
+      })
+      .on('click', 'input:radio', function(e) {
+        showingCategory = this.value
+        render()
+      })
+  })
+</script>
+</html>
+
+
+

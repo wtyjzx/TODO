@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+</head>
+<body>
+  <div>
+    <header>
+      <input type="checkbox" id="toggleSelectAll">
+      <input type="text" id="todoInput">
+    </header>
+    <ul id="todos">
+    </ul>
+    <footer>
+      <span>
+        <span id="leftCount"></span> item(s) left
+      </span>
+    </footer>
+  </div>
+</body>
+<script>
+  // debugger
+  var toggleSelectAll = document.querySelector('#toggleSelectAll')
+  var todoInput = document.querySelector('#todoInput')
+  var todos = document.querySelector('#todos')
+  var leftCount = document.querySelector('#leftCount')
+
+
+  function updateConut() {
+    return
+
+
+
+
+    var checks = Array.from(todos.querySelectorAll('input[type="checkbox"]'))
+    leftCount.textContent = checks.filter(it => !it.checked).length
+  }
+
+  toggleSelectAll.addEventListener('click', function() {
+    var checks = Array.from(todos.querySelectorAll('input[type="checkbox"]'))
+    if (this.checked) {
+      checks.forEach(it => it.checked = true)
+      checks.map(it => it.parentNode).forEach(li => li.classList.add('todo-done'))
+    } else {
+      checks.forEach(it => it.checked = false)
+      checks.map(it => it.parentNode).forEach(li => li.classList.remove('todo-done'))
+    }
+    updateConut()
+  })
+
+  todoInput.addEventListener('keydown', function(event) {
+    if (event.keyCode === 13 && todoInput.value != '') {
+      toggleSelectAll.checked = false
+
+
+      var li = document.createElement('li')
+      li.classList.add('todo')
+
+      var todoDone = document.createElement('input')
+      todoDone.type = 'checkbox'
+      todoDone.addEventListener('click', function(event){
+
+        if (this.checked) {
+          li.classList.add('todo-done')
+        } else {
+          li.classList.remove('todo-done')
+        }
+
+        var checks = Array.from(todos.querySelectorAll('input[type="checkbox"]'))
+        var isAllSelected = checks.every(it => it.checked)
+
+        if (isAllSelected) {
+          toggleSelectAll.checked = true
+        } else {
+          toggleSelectAll.checked = false
+        }
+
+        updateConut()
+        
+      })
+      li.append(todoDone)
+
+      var span = document.createElement('span')
+      // debugger
+      span.textContent = todoInput.value
+      li.append(span)
+      span.addEventListener('dblclick', function(event) {
+        li.classList.add('editing')
+        todoEdit.focus()
+      })
+
+      var todoEdit = document.createElement('input')
+      todoEdit.classList.add('todo-edit')
+      todoEdit.type = 'text'
+      todoEdit.value = todoInput.value
+      li.append(todoEdit)
+      todoEdit.addEventListener('blur', function() {
+        li.classList.remove('editing')
+        span.textContent = this.value
+      })
+      todoInput.value = ''
+
+      var todoDel = document.createElement('i')
+      todoDel.classList.add('delete-todo')
+      todoDel.textContent = 'X'
+      li.append(todoDel)
+
+      todoDel.addEventListener('click', function() {
+        li.parentNode.removeChild(li)
+      })
+
+      todos.appendChild(li)
+
+      updateConut()
+    }
+  })
+</script>
+<style>
+
+  body {
+    counter-reset: left-count;
+  }
+  li:not(.todo-done) {
+    counter-increment: left-count;
+  }
+  #leftCount:before {
+    content: counter(left-count);
+  }
+
+  .todo-edit {
+    display: none;
+  }
+  .delete-todo {
+    display: none;
+    float: right;
+    cursor: pointer;
+  }
+  li.todo-done {
+    text-decoration: line-through;
+  }
+  li.editing .todo-edit {
+    display: inline-block;
+  }
+  li.editing span {
+    display: none;
+  }
+  li.editing.editing.editing .delete-todo {
+    display: none;
+  }
+  li.todo:hover .delete-todo {
+    display: inline;
+  }
+</style>
+</html>
